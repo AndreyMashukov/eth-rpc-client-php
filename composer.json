@@ -3,7 +3,12 @@
     "description": "Ethereum JSON-RPC client in pure PHP — raw eth_* mirror (EthRpcClient) + ethers.js v6-flavoured facade (JsonRpcProvider) over any PSR-18 client. Typed Value Objects (transaction + receipt bundle, block, fee data, fee history, logs), bigint-safe hex/decimal helpers.",
     "type": "library",
     "license": "MIT",
-    "keywords": ["ethereum", "evm", "json-rpc", "ethers", "web3", "psr-18", "blockchain"],
+    "homepage": "https://github.com/AndreyMashukov/eth-rpc-client-php",
+    "keywords": ["ethereum", "evm", "json-rpc", "ethers", "web3", "psr-18", "blockchain", "eip-1559", "eth-rpc", "smart-contract", "erc20", "wei", "php"],
+    "support": {
+        "issues": "https://github.com/AndreyMashukov/eth-rpc-client-php/issues",
+        "source": "https://github.com/AndreyMashukov/eth-rpc-client-php"
+    },
     "authors": [
         {
             "name": "Andrei Mashukov",
