@@ -7,7 +7,9 @@ namespace Amashukov\EthRpc;
 use Amashukov\EthRpc\Vo\EthereumBlock;
 use Amashukov\EthRpc\Vo\EthereumFeeData;
 use Amashukov\EthRpc\Vo\EthereumFeeHistory;
+use Amashukov\EthRpc\Vo\EthereumTransaction;
 use Amashukov\EthRpc\Vo\EthereumTransactionLog;
+use Amashukov\EthRpc\Vo\EthereumTransactionReceipt;
 use Amashukov\EthRpc\Vo\EthereumTxBundle;
 
 interface JsonRpcProviderInterface
@@ -52,8 +54,23 @@ interface JsonRpcProviderInterface
      * Typed VO pair (request envelope + execution receipt) for $hash,
      * combining `eth_getTransactionByHash` + `eth_getTransactionReceipt`.
      * EIP-658 status: `0x1` → Success, `0x0` → Failure; null receipt → Pending.
+     *
+     * @throws TransactionNotFoundException when `eth_getTransactionByHash` has no result for $hash
      */
     public function getTypedTransaction(string $hash): EthereumTxBundle;
+
+    /**
+     * Typed `eth_getTransactionByHash` result. The returned VO carries
+     * `isPresent() === false` when the node has no transaction for $hash
+     * (neither mined nor in the mempool).
+     */
+    public function getTransactionByHashTyped(string $hash): EthereumTransaction;
+
+    /**
+     * Typed `eth_getTransactionReceipt` result. A null receipt (tx not yet
+     * mined) maps to an `EthereumTransactionReceipt` with `Pending` status.
+     */
+    public function getTransactionReceiptTyped(string $hash): EthereumTransactionReceipt;
 
     /**
      * Typed log list wrapping `eth_getLogs`.

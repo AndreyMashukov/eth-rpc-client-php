@@ -22,7 +22,13 @@ final readonly class EthereumTransaction
         public ?string $chainId,
         public ?string $data,
         public EthereumTransactionType $type,
+        public bool $present = true,
     ) {}
+
+    public function isPresent(): bool
+    {
+        return $this->present;
+    }
 
     /**
      * @param null|array<string, mixed> $tx eth_getTransactionByHash result envelope
@@ -43,6 +49,7 @@ final readonly class EthereumTransaction
                 chainId: null,
                 data: null,
                 type: EthereumTransactionType::Legacy,
+                present: false,
             );
         }
 

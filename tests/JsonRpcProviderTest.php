@@ -11,6 +11,7 @@ use Amashukov\EthRpc\BlockTag;
 use Amashukov\EthRpc\EthRpcClientInterface;
 use Amashukov\EthRpc\JsonRpcProvider;
 use Amashukov\EthRpc\Tests\Support\FrozenClock;
+use Amashukov\EthRpc\TransactionNotFoundException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -69,6 +70,49 @@ final class JsonRpcProviderTest extends TestCase
 
         self::assertTrue($bundle->isStatusSuccess());
         self::assertSame('0xaaa', $bundle->transaction->from);
+    }
+
+    public function testGetTypedTransactionThrowsWhenTransactionAbsent(): void
+    {
+        $client = $this->createMock(EthRpcClientInterface::class);
+        $client->method('eth_getTransactionByHash')->willReturn(null);
+        $client->method('eth_getTransactionReceipt')->willReturn(null);
+
+        $this->expectException(TransactionNotFoundException::class);
+        $this->provider($client)->getTypedTransaction('0xmissing');
+    }
+
+    public function testGetTypedTransactionSucceedsWhenReceiptPendingButTxPresent(): void
+    {
+        $client = $this->createMock(EthRpcClientInterface::class);
+        $client->method('eth_getTransactionByHash')->willReturn(['from' => '0xAAA', 'value' => '0x0']);
+        $client->method('eth_getTransactionReceipt')->willReturn(null);
+
+        $bundle = $this->provider($client)->getTypedTransaction('0xpending');
+
+        self::assertTrue($bundle->isStatusPending());
+        self::assertTrue($bundle->transaction->isPresent());
+    }
+
+    public function testGetTransactionByHashTypedReportsPresence(): void
+    {
+        $client = $this->createMock(EthRpcClientInterface::class);
+        $client->method('eth_getTransactionByHash')->willReturnOnConsecutiveCalls(
+            ['from' => '0xAAA', 'value' => '0x0'],
+            null,
+        );
+
+        $provider = $this->provider($client);
+        self::assertTrue($provider->getTransactionByHashTyped('0xpresent')->isPresent());
+        self::assertFalse($provider->getTransactionByHashTyped('0xabsent')->isPresent());
+    }
+
+    public function testGetTransactionReceiptTypedReturnsPendingOnNull(): void
+    {
+        $client = $this->createMock(EthRpcClientInterface::class);
+        $client->method('eth_getTransactionReceipt')->willReturn(null);
+
+        self::assertTrue($this->provider($client)->getTransactionReceiptTyped('0xhash')->isStatusPending());
     }
 
     public function testGetTypedLogsWrapsEachRow(): void

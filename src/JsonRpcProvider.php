@@ -60,13 +60,25 @@ final readonly class JsonRpcProvider implements JsonRpcProviderInterface
 
     public function getTypedTransaction(string $hash): EthereumTxBundle
     {
-        $receiptRow = $this->client->eth_getTransactionReceipt($hash);
-        $txRow      = $this->client->eth_getTransactionByHash($hash);
+        $transaction = $this->getTransactionByHashTyped($hash);
+        if (!$transaction->isPresent()) {
+            throw new TransactionNotFoundException($hash);
+        }
 
         return new EthereumTxBundle(
-            transaction: EthereumTransaction::fromArray($hash, $txRow),
-            receipt: EthereumTransactionReceipt::fromArray($hash, $receiptRow),
+            transaction: $transaction,
+            receipt: $this->getTransactionReceiptTyped($hash),
         );
+    }
+
+    public function getTransactionByHashTyped(string $hash): EthereumTransaction
+    {
+        return EthereumTransaction::fromArray($hash, $this->client->eth_getTransactionByHash($hash));
+    }
+
+    public function getTransactionReceiptTyped(string $hash): EthereumTransactionReceipt
+    {
+        return EthereumTransactionReceipt::fromArray($hash, $this->client->eth_getTransactionReceipt($hash));
     }
 
     public function getTypedLogs(array $filter): array

@@ -20,6 +20,14 @@ final class EthereumTransactionTest extends TestCase
         self::assertSame('0', $tx->value);
         self::assertNull($tx->nonce);
         self::assertSame(EthereumTransactionType::Legacy, $tx->type);
+        self::assertFalse($tx->isPresent());
+    }
+
+    public function testPresentRowIsMarkedPresent(): void
+    {
+        $tx = EthereumTransaction::fromArray('0xhash', ['from' => '0xAAA', 'value' => '0x0']);
+
+        self::assertTrue($tx->isPresent());
     }
 
     public function testEip1559Transaction(): void
