@@ -136,6 +136,34 @@ final class EthRpcClientTest extends TestCase
         $client->eth_blockNumber();
     }
 
+    public function testInvalidJsonReportsTheStatusAndBodySoAnHtmlErrorPageIsIdentifiable(): void
+    {
+        $page   = '<html><head><title>502 Bad Gateway</title></head><body>nginx</body></html>';
+        $stub   = new StubHttpClient($this->factory->createResponse(502)->withBody($this->factory->createStream($page)));
+        $client = $this->client($stub);
+
+        try {
+            $client->eth_blockNumber();
+            self::fail('expected an EthRpcException');
+        } catch (EthRpcException $exception) {
+            self::assertStringContainsString('HTTP 502', $exception->getMessage());
+            self::assertStringContainsString('502 Bad Gateway', $exception->getMessage());
+        }
+    }
+
+    public function testInvalidJsonBodyIsTruncatedSoALargePageCannotFloodTheLog(): void
+    {
+        $stub   = new StubHttpClient($this->json(str_repeat('x', 4096)));
+        $client = $this->client($stub);
+
+        try {
+            $client->eth_blockNumber();
+            self::fail('expected an EthRpcException');
+        } catch (EthRpcException $exception) {
+            self::assertLessThan(512, strlen($exception->getMessage()));
+        }
+    }
+
     public function testTransportExceptionIsWrapped(): void
     {
         $client = $this->client(new StubHttpClient(null, new StubClientException('connection refused')));

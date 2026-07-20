@@ -161,10 +161,12 @@ final class EthRpcClient implements EthRpcClientInterface
             throw new EthRpcException(sprintf('HTTP transport error calling %s: %s', $method, $exception->getMessage()), 0, $exception);
         }
 
+        $rawBody = (string) $response->getBody();
+
         try {
-            $json = json_decode((string) $response->getBody(), true, 512, \JSON_THROW_ON_ERROR);
+            $json = json_decode($rawBody, true, 512, \JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
-            throw new EthRpcException(sprintf('Invalid JSON response from %s', $method), 0, $exception);
+            throw new EthRpcException(sprintf('Invalid JSON response from %s: HTTP %d, body[0..256]=%s', $method, $response->getStatusCode(), substr($rawBody, 0, 256)), 0, $exception);
         }
 
         if (!is_array($json)) {
