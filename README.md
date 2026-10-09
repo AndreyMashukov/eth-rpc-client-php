@@ -55,6 +55,11 @@ if ($bundle->isStatusSuccess()) {
 
 $fee  = $provider->getFeeData();                           // EthereumFeeData
 $usdt = $provider->getErc20Balance('0xdAC17...', '0xholder...');
+
+$block = $provider->getBlockWithTransactions('latest');    // EthereumBlockWithTransactions
+foreach ($block?->transactions ?? [] as $tx) {
+    // $tx->to, $tx->value (decimal wei), $tx->hash — scan a block's recipients in one call
+}
 ```
 
 Wire a retry / API-key pipeline by composing

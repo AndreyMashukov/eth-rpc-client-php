@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Amashukov\EthRpc;
 
 use Amashukov\EthRpc\Vo\EthereumBlock;
+use Amashukov\EthRpc\Vo\EthereumBlockWithTransactions;
 use Amashukov\EthRpc\Vo\EthereumFeeData;
 use Amashukov\EthRpc\Vo\EthereumFeeHistory;
 use Amashukov\EthRpc\Vo\EthereumTransaction;
@@ -49,6 +50,11 @@ interface JsonRpcProviderInterface
      * Typed `EthereumBlock` VO; null when the block is missing.
      */
     public function getBlock(string $numberOrTag): ?EthereumBlock;
+
+    /**
+     * Typed block together with every transaction it carries, so a caller can scan the block's recipients in one request; null when the block does not exist yet.
+     */
+    public function getBlockWithTransactions(string $numberOrTag): ?EthereumBlockWithTransactions;
 
     /**
      * Typed VO pair (request envelope + execution receipt) for $hash,

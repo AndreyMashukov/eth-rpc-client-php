@@ -7,6 +7,7 @@ namespace Amashukov\EthRpc;
 use Amashukov\AbiEncoder\AbiEncoder;
 use Amashukov\EthRpc\Numeric\HexInt;
 use Amashukov\EthRpc\Vo\EthereumBlock;
+use Amashukov\EthRpc\Vo\EthereumBlockWithTransactions;
 use Amashukov\EthRpc\Vo\EthereumFeeData;
 use Amashukov\EthRpc\Vo\EthereumFeeHistory;
 use Amashukov\EthRpc\Vo\EthereumTransaction;
@@ -56,6 +57,11 @@ final readonly class JsonRpcProvider implements JsonRpcProviderInterface
     public function getBlock(string $numberOrTag): ?EthereumBlock
     {
         return EthereumBlock::fromArray($this->client->eth_getBlockByNumber($numberOrTag));
+    }
+
+    public function getBlockWithTransactions(string $numberOrTag): ?EthereumBlockWithTransactions
+    {
+        return EthereumBlockWithTransactions::fromArray($this->client->eth_getBlockByNumberWithTransactions($numberOrTag));
     }
 
     public function getTypedTransaction(string $hash): EthereumTxBundle

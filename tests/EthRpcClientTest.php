@@ -52,6 +52,18 @@ final class EthRpcClientTest extends TestCase
         self::assertSame(['0xabc', 'latest'], $payload['params']);
     }
 
+    public function testBlockWithTransactionsAsksForFullTransactionObjects(): void
+    {
+        $stub   = new StubHttpClient($this->json('{"result":{"number":"0x10","hash":"0xabc","parentHash":"0xdef","timestamp":"0x1","transactions":[]}}'));
+        $client = $this->client($stub);
+
+        self::assertSame('0x10', $client->eth_getBlockByNumberWithTransactions('0x10')['number'] ?? null);
+
+        $payload = $this->decodeBody($this->lastRequest($stub));
+        self::assertSame('eth_getBlockByNumber', $payload['method']);
+        self::assertSame(['0x10', true], $payload['params']);
+    }
+
     public function testChainIdDecodesHex(): void
     {
         $client = $this->client(new StubHttpClient($this->json('{"result":"0x1"}')));

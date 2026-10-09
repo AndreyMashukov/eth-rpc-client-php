@@ -32,6 +32,11 @@ final class EthRpcClient implements EthRpcClientInterface
         return $this->nullableObject($this->call('eth_getBlockByNumber', [$blockHashOrTag, false]));
     }
 
+    public function eth_getBlockByNumberWithTransactions(string $blockHashOrTag): ?array
+    {
+        return $this->nullableObject($this->call('eth_getBlockByNumber', [$blockHashOrTag, true]));
+    }
+
     public function eth_getLogs(array $filter): array
     {
         $result = $this->call('eth_getLogs', [$filter]);

@@ -24,6 +24,17 @@ interface EthRpcClientInterface
     public function eth_getBlockByNumber(string $blockHashOrTag): ?array;
 
     /**
+     * Returns the block with its full transaction objects (`eth_getBlockByNumber` with `true`), or null for a block that does not exist yet.
+     *
+     * @internal Consumed by `JsonRpcProvider::getBlockWithTransactions`.
+     *
+     * @param string $blockHashOrTag hex block number (e.g. "0x10d4f") or tag ("latest", "earliest", "pending")
+     *
+     * @return null|array<string, mixed>
+     */
+    public function eth_getBlockByNumberWithTransactions(string $blockHashOrTag): ?array;
+
+    /**
      * Returns an array of log objects matching the given filter.
      *
      * @internal Consumed by `JsonRpcProvider::getTypedLogs`.

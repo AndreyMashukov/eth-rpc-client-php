@@ -60,6 +60,21 @@ final class JsonRpcProviderTest extends TestCase
         self::assertSame('16', $block->number);
     }
 
+    public function testGetBlockWithTransactionsWrapsTypedVo(): void
+    {
+        $client = $this->createMock(EthRpcClientInterface::class);
+        $client->expects(self::once())->method('eth_getBlockByNumberWithTransactions')->with('latest')->willReturn([
+            'number' => '0x10', 'hash' => '0xabc', 'parentHash' => '0xdef', 'timestamp' => '0x1',
+            'transactions' => [['hash' => '0x01', 'from' => '0xAAA', 'to' => '0xBBB', 'value' => '0x1']],
+        ]);
+
+        $block = $this->provider($client)->getBlockWithTransactions('latest');
+
+        self::assertNotNull($block);
+        self::assertSame('16', $block->block->number);
+        self::assertSame('0xbbb', $block->transactions[0]->to);
+    }
+
     public function testGetTypedTransactionCombinesReceiptAndTx(): void
     {
         $client = $this->createMock(EthRpcClientInterface::class);
