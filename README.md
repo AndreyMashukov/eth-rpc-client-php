@@ -14,7 +14,7 @@ An **Ethereum JSON-RPC client in pure PHP** for any EVM chain, built on any [PSR
 
 ## Features
 
-- **Two layers, one transport** — `EthRpcClient` mirrors the `eth_*` namespace (`eth_blockNumber`, `eth_getBalance`, `eth_call`, `eth_getTransactionByHash`, `eth_getTransactionReceipt`, `eth_getLogs`, `eth_feeHistory`, …); `JsonRpcProvider` wraps it with typed Value Objects and ethers.js naming.
+- **Two layers, one transport** — `EthRpcClient` mirrors the `eth_*` namespace (`eth_blockNumber`, `eth_getBalance`, `eth_call`, `eth_estimateGas`, `eth_getTransactionByHash`, `eth_getTransactionReceipt`, `eth_getLogs`, `eth_feeHistory`, …); `JsonRpcProvider` wraps it with typed Value Objects and ethers.js naming.
 - **Transport-agnostic** — bring your own PSR-18 client + PSR-17 factories. Retry / key-rotation / load-balancing are middleware concerns, not baked in.
 - **Typed transaction surface** — `getTypedTransaction()` / `waitForTransaction()` return an `EthereumTxBundle` with EIP-658 `isStatusSuccess()` / `isStatusFail()` / `isStatusPending()` predicates, so call sites never compare raw `'0x1'` / `'0x0'` strings.
 - **EIP-1559 fee data** — `getFeeData()` mirrors ethers.js (`maxFeePerGas = 2 × baseFee + tip`); `getFeeHistory()` carries the gwei-median math.
@@ -60,6 +60,9 @@ $block = $provider->getBlockWithTransactions('latest');    // EthereumBlockWithT
 foreach ($block?->transactions ?? [] as $tx) {
     // $tx->to, $tx->value (decimal wei), $tx->hash — scan a block's recipients in one call
 }
+
+$gas = $client->eth_estimateGas(['from' => '0xsender...', 'to' => '0xdAC17...', 'data' => '0xa9059cbb...']);
+$gasLimit = intdiv($gas * 120, 100);                        // the node returns no margin — add your own
 ```
 
 Wire a retry / API-key pipeline by composing

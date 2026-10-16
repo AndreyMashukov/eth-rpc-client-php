@@ -70,6 +70,16 @@ final class EthRpcClient implements EthRpcClientInterface
         return $this->scalarString($this->call('eth_call', [$tx, $blockTag]));
     }
 
+    public function eth_estimateGas(array $tx): int
+    {
+        $result = $this->call('eth_estimateGas', [$tx]);
+        if (!is_string($result) || 1 !== preg_match('/^0x[0-9a-fA-F]{1,15}$/', $result)) {
+            throw new EthRpcException(sprintf('eth_estimateGas returned a non-quantity result: %s', substr(var_export($result, true), 0, 64)));
+        }
+
+        return (int) hexdec($result);
+    }
+
     public function eth_chainId(): int
     {
         return (int) hexdec($this->scalarString($this->call('eth_chainId', [])));

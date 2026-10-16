@@ -117,6 +117,40 @@ final class EthRpcClientTest extends TestCase
         self::assertSame(['0x2', 'latest', [50]], $payload['params']);
     }
 
+    public function testEstimateGasReturnsDecimalUnitsAndSendsOnlyTheTransaction(): void
+    {
+        $stub   = new StubHttpClient($this->json('{"result":"0x5208"}'));
+        $client = $this->client($stub);
+
+        self::assertSame(21000, $client->eth_estimateGas(['from' => '0x1', 'to' => '0x2', 'value' => '0x1']));
+
+        $payload = $this->decodeBody($this->lastRequest($stub));
+        self::assertSame('eth_estimateGas', $payload['method']);
+        self::assertSame([['from' => '0x1', 'to' => '0x2', 'value' => '0x1']], $payload['params']);
+    }
+
+    public function testEstimateGasRevertSurfacesTheNodeError(): void
+    {
+        $client = $this->client(new StubHttpClient($this->json('{"error":{"code":3,"message":"execution reverted: insufficient balance"}}')));
+
+        try {
+            $client->eth_estimateGas(['to' => '0x2', 'data' => '0xa9059cbb']);
+            self::fail('expected EthRpcException');
+        } catch (EthRpcException $e) {
+            self::assertSame(3, $e->getRpcCode());
+            self::assertStringContainsString('insufficient balance', $e->getMessage());
+        }
+    }
+
+    public function testEstimateGasRejectsANonQuantityResult(): void
+    {
+        $client = $this->client(new StubHttpClient($this->json('{"result":"not-hex"}')));
+
+        $this->expectException(EthRpcException::class);
+        $this->expectExceptionMessage('non-quantity');
+        $client->eth_estimateGas(['to' => '0x2']);
+    }
+
     public function testErrorEnvelopeThrowsWithRpcCode(): void
     {
         $client = $this->client(new StubHttpClient($this->json('{"error":{"code":-32000,"message":"execution reverted"}}')));

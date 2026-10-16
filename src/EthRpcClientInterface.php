@@ -84,6 +84,18 @@ interface EthRpcClientInterface
     public function eth_call(array $tx, string $blockTag = 'latest'): string;
 
     /**
+     * Estimates the gas a transaction would use if it were sent now, as a decimal integer.
+     * The node simulates the call against the pending state; a call that would revert fails
+     * with an EthRpcException carrying the node's error code and message. The estimate has no
+     * safety margin: add one before using it as a gas limit.
+     *
+     * @param array<string, mixed> $tx transaction object (from, to, data, value, gas, …)
+     *
+     * @throws EthRpcException when the node rejects the call or replies with something other than a hex quantity
+     */
+    public function eth_estimateGas(array $tx): int;
+
+    /**
      * Returns the chain ID as a decimal integer.
      */
     public function eth_chainId(): int;
